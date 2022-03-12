@@ -1,6 +1,7 @@
 import { useFormData } from 'hooks/useFormData';
 import type { NextPage } from 'next';
 import Head from 'next/head';
+import { JobForm } from 'components';
 
 const App: NextPage = () => {
   const { status, job } = useFormData();
@@ -12,7 +13,14 @@ const App: NextPage = () => {
         <meta name="description" content="" />
       </Head>
 
-      <main>{status === 'loading' ? <>Loading...</> : <p style={{color: 'white'}}>Job Loaded: {job?.job.title}... let&apos;s go!</p>}</main>
+      <main>
+        {status === 'loading' ?
+            <>Loading...</> :
+            job ?
+              <JobForm job={job} /> :
+              <>Loading error...</>
+        }
+      </main>
     </div>
   );
 };

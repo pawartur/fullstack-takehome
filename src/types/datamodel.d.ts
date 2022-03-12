@@ -15,7 +15,7 @@ namespace Frontier {
   }
 
   // Describes the job application UI
-  interface Job {
+  export interface Job {
     theme: Theme;
     job: JobMeta;
     messages: Messages;
