@@ -41,11 +41,23 @@ export const JobForm = ({ absoluteURL, job }: JobFormProps) => {
     let renderedElement: React.ReactElement
     switch (element.type) {
       case 'text': {
-        renderedElement = (<Text onChange={onChangeFn(element.id)} value={values?.[element.id]} />)
+        renderedElement = (
+          <Text 
+            placeholder={element.metadata.placeholder}
+            onChange={onChangeFn(element.id)} 
+            value={values?.[element.id]} 
+          />
+        )
         break
       }
       case 'textarea': {
-        renderedElement = (<Textarea onChange={onChangeFn(element.id)} value={values?.[element.id]} />)
+        renderedElement = (
+          <Textarea 
+            placeholder={element.metadata.placeholder}
+            onChange={onChangeFn(element.id)} 
+            value={values?.[element.id]} 
+          />
+        )
         break
       }
       case 'boolean': {
