@@ -3,7 +3,17 @@ import type { NextPage } from 'next';
 import Head from 'next/head';
 import { JobForm } from 'components';
 
-const App: NextPage = () => {
+export async function getServerSideProps(context: any) {
+  const { req, query, res, asPath, pathname } = context;
+  // TODO: Don't encode http scheme
+  return {
+    props: {
+      absoluteURL: `http://${req.headers.host}`
+    }
+  }
+}
+
+const App: NextPage = ({ absoluteURL }: any) => {
   const { status, job } = useFormData();
 
   return (
@@ -17,7 +27,10 @@ const App: NextPage = () => {
         {status === 'loading' ?
             <>Loading...</> :
             job ?
-              <JobForm job={job} /> :
+              <JobForm 
+                absoluteURL={absoluteURL}
+                job={job}
+              /> :
               <>Loading error...</>
         }
       </main>

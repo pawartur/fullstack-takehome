@@ -1,21 +1,40 @@
-import React from 'react';
+import { useState} from 'react';
 import { Bool, Button, Field, Text, Textarea, Multichoice } from 'components';
 import { useFormValues } from 'hooks';
 import { ThemeProvider } from 'styled-components';
 import * as S from '../../Demo/styles';
+import { postValuesToApplyAPI } from '../../../helpers/applyAPI';
 
 type JobFormProps = {
-    job: Frontier.Job
+  absoluteURL: string,
+  job: Frontier.Job
 };
 
-export const JobForm = ({ job }: JobFormProps) => {
+export const JobForm = ({ absoluteURL, job }: JobFormProps) => {
+  const [ isSubmitting, setIsSubmitting ] = useState(false);
   const { values, handleChange } = useFormValues(job);
 
   const onChangeFn = (id: string) => (nextVal: string) =>
     handleChange(id, nextVal);
 
   const handleSubmit = () => {
-    console.log('submit vals: %o', values);
+    if (isSubmitting) {
+      return;
+    } else {
+      setIsSubmitting(true)
+      postValuesToApplyAPI(
+        absoluteURL,
+        values
+      ).then((response) => {
+        console.log('submit response: %o', response);
+        if (response.status == 200) {
+          alert(job.messages.success)
+        } else {
+          alert("Something went wrong")
+        }
+        setIsSubmitting(false)
+      })
+    }
   };
 
   const renderSectionElement = (element: Frontier.Element) => {
@@ -73,9 +92,6 @@ export const JobForm = ({ job }: JobFormProps) => {
           {job.sections.map(renderSection)}
           <Button onClick={handleSubmit}>Button</Button>
         </S.Elements>
-        <S.Readout>
-          {JSON.stringify(values, null, 4)}
-        </S.Readout>
       </S.Frame>
     </ThemeProvider>
   );
