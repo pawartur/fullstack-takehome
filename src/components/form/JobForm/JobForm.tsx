@@ -1,5 +1,13 @@
 import { useState} from 'react';
-import { Bool, Button, Field, Text, Textarea, Multichoice } from 'components';
+import { 
+  Error,
+  Bool, 
+  Button, 
+  Field, 
+  Text, 
+  Textarea, 
+  Multichoice 
+} from 'components';
 import { useFormValues } from 'hooks';
 import { ThemeProvider } from 'styled-components';
 import * as S from '../../Demo/styles';
@@ -10,9 +18,43 @@ type JobFormProps = {
   job: Frontier.Job
 };
 
+type JobFormErrors = {
+  [id: string]: string
+}
+
 export const JobForm = ({ absoluteURL, job }: JobFormProps) => {
   const [ isSubmitting, setIsSubmitting ] = useState(false);
+  const [errors, setErrors] = useState<JobFormErrors>({})
   const { values, handleChange } = useFormValues(job);
+
+  const validateAllElements = (): JobFormErrors => {
+    const allErrors: JobFormErrors = {}
+
+    job.sections.map((section: Frontier.Section) => {
+      section.content.map((element: Frontier.Element) => {
+        const elementError = validateElement(element)
+        if (elementError) {
+          allErrors[element.id] = elementError
+        }
+      })
+    })
+
+    return allErrors;
+  }
+
+  const validateElement = (element: Frontier.Element): string | null => {
+    if (element.metadata.required) {
+      if (values[element.id] === undefined) {
+        return `${element.id} is required`
+      }
+    }
+    if (element.metadata.pattern && values[element.id] !== undefined) {
+      if (!(values[element.id]! as String).toLowerCase().match(element.metadata.pattern)) {
+        return `enter a valid ${element.id}`
+      }
+    }
+    return null
+  }
 
   const onChangeFn = (id: string) => (nextVal: string) =>
     handleChange(id, nextVal);
@@ -22,18 +64,27 @@ export const JobForm = ({ absoluteURL, job }: JobFormProps) => {
       return;
     } else {
       setIsSubmitting(true)
-      postValuesToApplyAPI(
-        absoluteURL,
-        values
-      ).then((response) => {
-        console.log('submit response: %o', response);
-        if (response.status == 200) {
-          alert(job.messages.success)
-        } else {
-          alert("Something went wrong")
-        }
+
+      // TODO: Consider validating elements one by one in onChangeFn
+      const currentErrors = validateAllElements()
+      setErrors(currentErrors)
+
+      if (Object.keys(currentErrors).length !== 0) {
         setIsSubmitting(false)
-      })
+      } else {
+        postValuesToApplyAPI(
+          absoluteURL,
+          values
+        ).then((response) => {
+          console.log('submit response: %o', response);
+          if (response.status == 200) {
+            alert(job.messages.success)
+          } else {
+            alert("Something went wrong")
+          }
+          setIsSubmitting(false)
+        })
+      }
     }
   };
 
@@ -79,6 +130,10 @@ export const JobForm = ({ absoluteURL, job }: JobFormProps) => {
     return (
       <Field label={element.question_text}>
         {renderedElement}
+        {errors[element.id] ?
+          (<Error message={errors[element.id]} />) : 
+          ""
+        }
       </Field>
     )
   }
