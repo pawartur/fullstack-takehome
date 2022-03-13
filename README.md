@@ -16,7 +16,7 @@ We've added some form components and scaffolding so you can hit the ground runni
 - [x] Setup the project.
 - [x] Create base form elements.
 - [x] Load the data from the server.
-- [ ] Create a form using the fetched JSON and the included components.
+- [x] Create a form using the fetched JSON and the included components.
 - [ ] Create the missing 'monochoice' component.
 - [ ] When the form is submitted, send the user's inputted data to the endpoint in `/api/apply.ts` and log it to the console.
 - [ ] (optional) Break the form steps into pages, so each section is a new page.
