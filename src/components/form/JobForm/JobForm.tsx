@@ -1,5 +1,5 @@
 import React from 'react';
-import { Bool, Button, Field, Text, Textarea } from 'components';
+import { Bool, Button, Field, Text, Textarea, Multichoice } from 'components';
 import { useFormValues } from 'hooks';
 import { ThemeProvider } from 'styled-components';
 import * as S from '../../Demo/styles';
@@ -35,9 +35,11 @@ export const JobForm = ({ job }: JobFormProps) => {
       }
       case 'multichoice': {
         renderedElement = (
-          <Field label='Multichoice - unsupported'>
-            {element.question_text}
-          </Field>
+          <Multichoice 
+            options={element.metadata.options} 
+            onChange={onChangeFn(element.id)} 
+            value={values?.[element.id]} 
+          />
         )
         break
       }

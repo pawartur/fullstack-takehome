@@ -15,7 +15,7 @@ namespace Frontier {
   }
 
   // Describes the job application UI
-  export interface Job {
+  interface Job {
     theme: Theme;
     job: JobMeta;
     messages: Messages;
@@ -41,12 +41,17 @@ namespace Frontier {
       | 'multichoice'; // Select field with multiple choices available
   }
 
+  interface Option { 
+    label: string; 
+    value: string 
+  }
+
   // Field metadata objects are different per element, with some shared values.
   // The shared values are non-optional in this interface
   interface ElementMeta {
     required: boolean;
     placeholder?: string;
-    options?: { label: string; value: string }[];
+    options?: Option[];
     format?: 'text' | 'email' | 'number';
     pattern?: string;
     step?: number;
