@@ -19,8 +19,8 @@ We've added some form components and scaffolding so you can hit the ground runni
 - [x] Create a form using the fetched JSON and the included components.
 - [x] Create the missing 'monochoice' component.
 - [x] When the form is submitted, send the user's inputted data to the endpoint in `/api/apply.ts` and log it to the console.
-- [ ] (optional) Break the form steps into pages, so each section is a new page.
-- [ ] (optional) Add some validation to the form.
+- [x] (optional) Break the form steps into pages, so each section is a new page.
+- [x] (optional) Add some validation to the form.
 - [ ] (optional) Come up with a way to only show the `experience` field if the user confirms they are 18+ years old. Ideally the method you use can be used to conditionally show any field depending on a previous answer.
 - [ ] Write down and share how you would deploy and host this project for the following use cases:
   - One developer working on this as an MVP where the project won't need many updates.

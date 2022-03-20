@@ -24,9 +24,22 @@ type JobFormErrors = {
 
 export const JobForm = ({ absoluteURL, job }: JobFormProps) => {
   const [ isSubmitting, setIsSubmitting ] = useState(false);
+  const [ currentSectionNumber, setCurrentSectionNumber ] = useState(0);
   const [errors, setErrors] = useState<JobFormErrors>({})
   const { values, handleChange } = useFormValues(job);
 
+  const validateCurrentSection = (): JobFormErrors => {
+    const section = job.sections[currentSectionNumber]
+    const allErrors: JobFormErrors = {}
+    section.content.map((element: Frontier.Element) => {
+      const elementError = validateElement(element)
+      if (elementError) {
+        allErrors[element.id] = elementError
+      }
+    })
+    return allErrors
+  }
+  
   const validateAllElements = (): JobFormErrors => {
     const allErrors: JobFormErrors = {}
 
@@ -58,6 +71,25 @@ export const JobForm = ({ absoluteURL, job }: JobFormProps) => {
 
   const onChangeFn = (id: string) => (nextVal: string) =>
     handleChange(id, nextVal);
+
+  const handleGoToPreviousSection = () => {
+    setCurrentSectionNumber(currentSectionNumber - 1)
+  }
+
+  const handleGoToNextSection = () => {
+    if (isSubmitting) {
+      return;
+    } else {
+      setIsSubmitting(true)
+      // TODO: Consider validating elements one by one in onChangeFn
+      const sectionErrors = validateCurrentSection()
+      setErrors(sectionErrors)
+      if (Object.keys(sectionErrors).length === 0) {
+        setCurrentSectionNumber(currentSectionNumber + 1)
+      }
+      setIsSubmitting(false)
+    }
+  }
 
   const handleSubmit = () => {
     if (isSubmitting) {
@@ -138,7 +170,8 @@ export const JobForm = ({ absoluteURL, job }: JobFormProps) => {
     )
   }
 
-  const renderSection = (section: Frontier.Section) => {
+  const renderCurrentSection = () => {
+    const section = job.sections[currentSectionNumber];
     return (
         <div>
           <Field>
@@ -149,6 +182,29 @@ export const JobForm = ({ absoluteURL, job }: JobFormProps) => {
       );
   }
 
+  const rendersFirstSection = () => {
+    return currentSectionNumber === 0;
+  }
+
+  const rendersLastSection = () => {
+    return currentSectionNumber === job.sections.length - 1;
+  }
+
+  const renderButtons = () => {
+    return (
+      <div>
+        {rendersFirstSection() ?
+          '' : 
+          <Button type='changeSection' onClick={handleGoToPreviousSection}>Previous Section</Button>  
+        }
+        {rendersLastSection() ? 
+          <Button onClick={handleSubmit}>Submit</Button> :
+          <Button type='changeSection' onClick={handleGoToNextSection}>Next Section</Button>
+        }
+      </div>
+    );
+  }
+
   return (
     <ThemeProvider theme={job.theme}>
       <S.Frame>
@@ -156,8 +212,8 @@ export const JobForm = ({ absoluteURL, job }: JobFormProps) => {
           <Field label='Job Title'>
             <h1>{job.job.title}</h1>
           </Field>
-          {job.sections.map(renderSection)}
-          <Button onClick={handleSubmit}>Button</Button>
+          {renderCurrentSection()}
+          {renderButtons()}
         </S.Elements>
       </S.Frame>
     </ThemeProvider>
