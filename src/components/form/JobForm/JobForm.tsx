@@ -8,7 +8,7 @@ import {
   Textarea, 
   Multichoice 
 } from 'components';
-import { useFormValues } from 'hooks';
+import { FormValues, useFormValues } from 'hooks';
 import { ThemeProvider } from 'styled-components';
 import * as S from '../../Demo/styles';
 import { postValuesToApplyAPI } from '../../../helpers/applyAPI';
@@ -22,11 +22,18 @@ type JobFormErrors = {
   [id: string]: string
 }
 
+type ConditionalQuestions = {
+  [id: string]: FormValues
+}
+
 export const JobForm = ({ absoluteURL, job }: JobFormProps) => {
   const [ isSubmitting, setIsSubmitting ] = useState(false);
   const [ currentSectionNumber, setCurrentSectionNumber ] = useState(0);
   const [errors, setErrors] = useState<JobFormErrors>({})
   const { values, handleChange } = useFormValues(job);
+  const conditionalQuestions: ConditionalQuestions = {
+    experience: {age: true}
+  }
 
   const validateCurrentSection = (): JobFormErrors => {
     const section = job.sections[currentSectionNumber]
@@ -56,7 +63,7 @@ export const JobForm = ({ absoluteURL, job }: JobFormProps) => {
   }
 
   const validateElement = (element: Frontier.Element): string | null => {
-    if (element.metadata.required) {
+    if (shouldDisplayElement(element) && element.metadata.required) {
       if (values[element.id] === undefined) {
         return `${element.id} is required`
       }
@@ -120,7 +127,24 @@ export const JobForm = ({ absoluteURL, job }: JobFormProps) => {
     }
   };
 
+  const shouldDisplayElement = (element: Frontier.Element) => {
+    if (conditionalQuestions[element.id] !== undefined) {
+      const idsOfFieldsElementDependsOn = Object.keys(conditionalQuestions[element.id])
+      for (let i = 0; i < idsOfFieldsElementDependsOn.length; i++) {
+        if (values?.[idsOfFieldsElementDependsOn[i]] !== 
+            conditionalQuestions[element.id][idsOfFieldsElementDependsOn[i]]) {
+          return false
+        }
+      }
+    }
+    return true
+  }
+
   const renderSectionElement = (element: Frontier.Element) => {
+    if (!shouldDisplayElement(element)) {
+      return ''
+    }
+
     let renderedElement: React.ReactElement
     switch (element.type) {
       case 'text': {
